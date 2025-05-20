@@ -86,57 +86,6 @@ def main():
     plc_trainer = PLC_Trainer(args, train_dataloader, valid_dataloader, test_dataloader)
     z_train, z_valid, z_test, best_plc_model, dists_list = plc_trainer.train()
 
-    # if args.noise_type == "llm":
-    #     buffer_path = f"../stage1_buffer/{args.noise_type}/{args.prompt_type}/{args.llm_type}/{args.dataset}/{args.seed}"
-    # elif args.noise_type == "synthetic":
-    #     buffer_path = f"../stage1_buffer/{args.noise_type}/{args.dataset}/{args.noise_ratio}/{args.syn_type}/{args.seed}"
-    # elif args.noise_type == "realworld":
-    #     buffer_path = f"../stage1_buffer/{args.noise_type}/{args.dataset}/{args.seed}"
-
-
-    # torch.save(z_train, f'{buffer_path}/z_train.pt')
-    # torch.save(z_valid, f'{buffer_path}/z_valid.pt')
-    # torch.save(z_test, f'{buffer_path}/z_test.pt')
-    # torch.save(best_plc_model, f'{buffer_path}/best_plc_model.pt')
-    # torch.save(train_inputs, f'{buffer_path}/train_inputs.pt')
-    # torch.save(valid_inputs, f'{buffer_path}/valid_inputs.pt')
-    # torch.save(test_inputs, f'{buffer_path}/test_inputs.pt')
-    # torch.save(train_masks, f'{buffer_path}/train_masks.pt')
-    # torch.save(valid_masks, f'{buffer_path}/valid_masks.pt')
-    # torch.save(test_masks, f'{buffer_path}/test_masks.pt')
-    # torch.save(train_true_labels, f'{buffer_path}/train_true_labels.pt')
-    # torch.save(valid_true_labels, f'{buffer_path}/valid_true_labels.pt')
-    # torch.save(test_true_labels, f'{buffer_path}/test_true_labels.pt')
-    # torch.save(train_noisy_labels, f'{buffer_path}/train_noisy_labels.pt')
-    # torch.save(valid_noisy_labels, f'{buffer_path}/valid_noisy_labels.pt')
-    # torch.save(train_embedding, f'{buffer_path}/train_embedding.pt')
-    # torch.save(valid_embedding, f'{buffer_path}/valid_embedding.pt')
-    # torch.save(test_embedding, f'{buffer_path}/test_embedding.pt')
-    # torch.save(dists_list, f'{buffer_path}/dists_list.pt')
-
-    # # asd
-    # z_train = torch.load(f'{buffer_path}/z_train.pt', map_location=args.device)
-    # z_valid = torch.load(f'{buffer_path}/z_valid.pt', map_location=args.device)
-    # z_test = torch.load(f'{buffer_path}/z_test.pt', map_location=args.device)
-    # best_plc_model = torch.load(f'{buffer_path}/best_plc_model.pt', map_location=args.device)
-    # train_inputs = torch.load(f'{buffer_path}/train_inputs.pt', map_location=args.device)
-    # valid_inputs = torch.load(f'{buffer_path}/valid_inputs.pt', map_location=args.device)
-    # test_inputs = torch.load(f'{buffer_path}/test_inputs.pt', map_location=args.device)
-    # train_masks = torch.load(f'{buffer_path}/train_masks.pt', map_location=args.device)
-    # valid_masks = torch.load(f'{buffer_path}/valid_masks.pt', map_location=args.device)
-    # test_masks = torch.load(f'{buffer_path}/test_masks.pt', map_location=args.device)
-    # train_true_labels = torch.load(f'{buffer_path}/train_true_labels.pt', map_location=args.device)
-    # valid_true_labels = torch.load(f'{buffer_path}/valid_true_labels.pt', map_location=args.device)
-    # test_true_labels = torch.load(f'{buffer_path}/test_true_labels.pt', map_location=args.device)
-    # train_noisy_labels = torch.load(f'{buffer_path}/train_noisy_labels.pt', map_location=args.device)
-    # valid_noisy_labels = torch.load(f'{buffer_path}/valid_noisy_labels.pt', map_location=args.device)
-    # test_labels = torch.load(f'{buffer_path}/test_true_labels.pt', map_location=args.device)
-    # train_embedding = torch.load(f'{buffer_path}/train_embedding.pt', map_location=args.device)
-    # valid_embedding = torch.load(f'{buffer_path}/valid_embedding.pt', map_location=args.device)
-    # test_embedding = torch.load(f'{buffer_path}/test_embedding.pt', map_location=args.device)
-    # dists_list = torch.load(f'{buffer_path}/dists_list.pt', map_location=args.device)
-    # best_plc_model.args = args
-
 
     print("==========================Compute Training Dynamic Prior ==========================")
     print(z_train.shape) # (models, epochs, batch, dim)
@@ -182,42 +131,17 @@ def main():
 
     valid_priors = []
 
-    # certain_correct = 0
-    # max_uncertain_correct = 0
-    # true_in_uncertain = 0
     for idx in range(M):
         knn_labels = train_noisy_labels
         knn_true_labels = train_true_labels
-        # knn_z0 = train_embedding
-        knn_z0 = z0_train[:, idx, :].squeeze()
-        
+        # knn_z0 = z0_train[:, idx, :].squeeze()
+        knn_z0 = train_embedding
         knn_prior = KNN_prior_dynamic(args, knn_z0, knn_labels, knn_true_labels, markers_list[idx].squeeze())
         priors, weights, uncertain_marker, true_labels = knn_prior.get_dynamic_prior(k=args.K)
         
         train_priors.append(priors)
         train_prior_weights.append(weights)
         train_uncertain_marker.append(uncertain_marker)
-
-    #     certain_marker = uncertain_marker[uncertain_marker==False]
-    #     for i in range(uncertain_marker.size(0)):
-    #         if uncertain_marker[i] == True:
-    #             max_uncertain_prior = torch.argmax(weights[i,:], dim=-1)
-    #             if max_uncertain_prior == train_true_labels[i]:
-    #                 max_uncertain_correct += 1
-    #             elif train_true_labels[i].cpu() in priors[i,:].cpu():
-    #                 true_in_uncertain += 1
-    #         else:
-    #             certain_prior = torch.argmax(weights[i,:], dim=-1)
-    #             if certain_prior == train_true_labels[i]:
-    #                 certain_correct += 1
-    
-    # print(certain_correct)
-    # print(max_uncertain_correct)
-    # print(true_in_uncertain)
-    # print(certain_correct + max_uncertain_correct)
-
-    # print(certain_correct + max_uncertain_correct + true_in_uncertain)
-    # print(train_noisy_labels.size(0)*3)
     
     train_uncertain_marker = torch.stack(train_uncertain_marker, dim=0)
 
@@ -248,7 +172,7 @@ def main():
         knn_labels = valid_noisy_labels
         knn_true_labels = valid_true_labels
         knn_z0 = z0_valid[:, idx, :].squeeze()
-
+        knn_z0 = valid_embedding
         knn_prior = KNN_prior_dynamic(args, knn_z0, knn_labels, knn_true_labels, markers_list[idx].squeeze())
         priors, weights, uncertain_marker, true_labels = knn_prior.get_dynamic_prior(k=args.K)
 
