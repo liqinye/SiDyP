@@ -1,7 +1,7 @@
 # SiDyP
 🔥[Calibrating Pre-trained Language Classifiers on LLM-generated Noisy Labels via Iterative Refinement]
 
-
+Official code for our KDD'25 paper "Calibrating Pre-trained Language Classifiers on LLM-generated Noisy Labels via Iterative Refinement"
 ![image](figure/sidyp.png)
 
 
