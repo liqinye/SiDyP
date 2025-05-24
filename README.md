@@ -11,8 +11,9 @@ Official code for our KDD'25 paper "Calibrating Pre-trained Language Classifiers
 
 Clone project and create environment with pip:
 ```
+conda create -n sidyp python=3.10
 pip install -r requirements.txt
-conda activate recontrol
+conda activate sidyp
 ```
 
 **Note**: you may need to adjust the torch (cuda) version according to your GPU.
